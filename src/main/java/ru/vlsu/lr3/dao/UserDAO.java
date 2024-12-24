@@ -8,8 +8,9 @@ import java.util.List;
 public interface UserDAO {
     void addUser(User user) throws SQLException;
     User getUser(int id);
-    List<User> getAllUser();
+    List<User> getAllUsers();
     void updateUser(User user);
     void deleteUser(int id);
-}
 
+    List<User> getUsersByIds(List<Integer> assigneeIds);
+}

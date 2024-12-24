@@ -1,14 +1,28 @@
 package ru.vlsu.lr3.beans;
 
-import java.util.Date;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 public class User {
     private int id;
-    private String name;
-    private String email;
-    private Date registr_date;
-    private int taskId;
 
+    @NotNull(message = "Name is required")
+    private String name;
+
+    @Email(message = "Email should be valid")
+    @NotNull(message = "Email is required")
+    private String email;
+
+    @NotNull(message = "Password is required")
+    private String password;
+
+    @NotNull(message = "Role is required")
+    private String role;
+
+    @NotNull(message = "Status is required")
+    private String status;
+
+    // Getters and setters
     public int getId() {
         return id;
     }
@@ -33,24 +47,32 @@ public class User {
         this.email = email;
     }
 
-    public Date getRegistr_date() {
-        return registr_date;
+    public String getPassword() {
+        return password;
     }
 
-    public void setRegistr_date(Date registr_date) {
-        this.registr_date = registr_date;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public int getTaskId() {
-        return taskId;
+    public String getRole() {
+        return role;
     }
 
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
     public String toString() {
-        return id + " " + name + " " + email + " " + registr_date;
+        return id + " " + name + " " + email + " " + role + " " + status;
     }
 }

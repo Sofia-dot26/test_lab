@@ -6,8 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
+import java.time.LocalDate;
 
 public class ProjectDAOImpl implements ProjectDAO {
+
     private final DataSource dataSource;
 
     public ProjectDAOImpl(DataSource dataSource) {
@@ -16,13 +18,15 @@ public class ProjectDAOImpl implements ProjectDAO {
 
     @Override
     public void addProject(Project project) {
-        String sql = "INSERT INTO projects (name, description, start_date, end_date) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO projects (name, description, start_date, end_date, priority, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, project.getName());
             statement.setString(2, project.getDescription());
-            statement.setDate(3, new java.sql.Date(project.getStart_date().getTime()));
-            statement.setDate(4, new java.sql.Date(project.getEnd_date().getTime()));
+            statement.setDate(3, Date.valueOf(project.getStartDate()));
+            statement.setDate(4, Date.valueOf(project.getEndDate()));
+            statement.setString(5, project.getPriority());
+            statement.setString(6, project.getStatus());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -48,8 +52,11 @@ public class ProjectDAOImpl implements ProjectDAO {
                     project.setId(resultSet.getInt("id"));
                     project.setName(resultSet.getString("name"));
                     project.setDescription(resultSet.getString("description"));
-                    project.setStart_date(resultSet.getDate("start_date"));
-                    project.setEnd_date(resultSet.getDate("end_date"));
+                    project.setStartDate(String.valueOf(resultSet.getDate("start_date")));
+                    project.setEndDate(String.valueOf(resultSet.getDate("end_date")));
+                    project.setPriority(resultSet.getString("priority"));
+                    project.setStatus(resultSet.getString("status"));
+                    // Добавьте логику для загрузки ответственных лиц и участников, если они хранятся в отдельных таблицах
                     return project;
                 }
             }
@@ -60,7 +67,7 @@ public class ProjectDAOImpl implements ProjectDAO {
     }
 
     @Override
-    public List<Project> getAllProject() {
+    public List<Project> getAllProjects() {
         List<Project> projects = new ArrayList<>();
         String sql = "SELECT * FROM projects";
         try (Connection connection = dataSource.getConnection();
@@ -71,8 +78,11 @@ public class ProjectDAOImpl implements ProjectDAO {
                 project.setId(resultSet.getInt("id"));
                 project.setName(resultSet.getString("name"));
                 project.setDescription(resultSet.getString("description"));
-                project.setStart_date(resultSet.getDate("start_date"));
-                project.setEnd_date(resultSet.getDate("end_date"));
+                project.setStartDate(String.valueOf(resultSet.getDate("start_date")));
+                project.setEndDate(String.valueOf(resultSet.getDate("end_date")));
+                project.setPriority(resultSet.getString("priority"));
+                project.setStatus(resultSet.getString("status"));
+                // Добавьте логику для загрузки ответственных лиц и участников, если они хранятся в отдельных таблицах
                 projects.add(project);
             }
         } catch (SQLException e) {
@@ -83,14 +93,16 @@ public class ProjectDAOImpl implements ProjectDAO {
 
     @Override
     public void updateProject(Project project) {
-        String sql = "UPDATE projects SET name = ?, description = ?, start_date = ?, end_date = ? WHERE id = ?";
+        String sql = "UPDATE projects SET name = ?, description = ?, start_date = ?, end_date = ?, priority = ?, status = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, project.getName());
             statement.setString(2, project.getDescription());
-            statement.setDate(3, new java.sql.Date(project.getStart_date().getTime()));
-            statement.setDate(4, new java.sql.Date(project.getEnd_date().getTime()));
-            statement.setInt(5, project.getId());
+            statement.setDate(3, Date.valueOf(project.getStartDate()));
+            statement.setDate(4, Date.valueOf(project.getEndDate()));
+            statement.setString(5, project.getPriority());
+            statement.setString(6, project.getStatus());
+            statement.setInt(7, project.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

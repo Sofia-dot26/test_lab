@@ -6,9 +6,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 
 public class DatabaseConnection {
-    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/ad";
+    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/manage";
     private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "1234";
+    private static final String PASSWORD = "12345678";
 
     private static DataSource dataSource;
 

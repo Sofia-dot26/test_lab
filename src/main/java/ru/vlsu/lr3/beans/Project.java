@@ -1,13 +1,17 @@
 package ru.vlsu.lr3.beans;
 
-import java.util.Date;
+import java.util.List;
 
 public class Project {
     private int id;
     private String name;
     private String description;
-    private Date start_date;
-    private Date end_date;
+    private String startDate;
+    private String endDate;
+    private List<String> responsiblePersons; // Ответственные лица (менеджеры проекта)
+    private List<String> participants; // Участники проекта
+    private String priority;
+    private String status;
 
     public int getId() {
         return id;
@@ -33,19 +37,51 @@ public class Project {
         this.description = description;
     }
 
-    public Date getStart_date() {
-        return start_date;
+    public String getStartDate() {
+        return startDate;
     }
 
-    public void setStart_date(Date start_date) {
-        this.start_date = start_date;
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
     }
 
-    public Date getEnd_date() {
-        return end_date;
+    public String getEndDate() {
+        return endDate;
     }
 
-    public void setEnd_date(Date end_date) {
-        this.end_date = end_date;
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public List<String> getResponsiblePersons() {
+        return responsiblePersons;
+    }
+
+    public void setResponsiblePersons(List<String> responsiblePersons) {
+        this.responsiblePersons = responsiblePersons;
+    }
+
+    public List<String> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<String> participants) {
+        this.participants = participants;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

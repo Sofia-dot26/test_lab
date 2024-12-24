@@ -1,0 +1,55 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="ru.vlsu.lr3.controller"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- DataSource configuration -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver" />
+        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/manage" />
+        <property name="username" value="postgres" />
+        <property name="password" value="12345678" />
+        <property name="maximumPoolSize" value="10"/>
+    </bean>
+
+
+    <!-- DAO Bean -->
+    <bean id="projectDAO" class="ru.vlsu.lr3.dao.ProjectDAOImpl">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+    <bean id="taskDAO" class="ru.vlsu.lr3.dao.TaskDAOImpl">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+    <bean id="userDAO" class="ru.vlsu.lr3.dao.UserDAOImpl">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <!-- Service Bean -->
+    <bean id="projectService" class="ru.vlsu.lr3.service.ProjectService">
+        <constructor-arg ref="projectDAO"/>
+    </bean>
+    <bean id="taskService" class="ru.vlsu.lr3.service.TaskService">
+        <constructor-arg ref="taskDAO"/>
+    </bean>
+    <bean id="userService" class="ru.vlsu.lr3.service.UserService">
+        <constructor-arg ref="userDAO"/>
+    </bean>
+    <!-- Включение поддержки аннотаций для Spring MVC -->
+    <mvc:annotation-driven />
+
+    <!-- Настройка валидатора -->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
+
+</beans>

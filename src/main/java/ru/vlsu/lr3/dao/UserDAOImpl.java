@@ -16,13 +16,14 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void addUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (name, email, registr_date, task_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (name, email, password, role, status) VALUES (?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
-            statement.setDate(3, new java.sql.Date(user.getRegistr_date().getTime()));
-            statement.setLong(4, user.getTaskId());
+            statement.setString(3, user.getPassword());
+            statement.setString(4, user.getRole());
+            statement.setString(5, user.getStatus());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -46,8 +47,9 @@ public class UserDAOImpl implements UserDAO {
                     user.setId(resultSet.getInt("id"));
                     user.setName(resultSet.getString("name"));
                     user.setEmail(resultSet.getString("email"));
-                    user.setRegistr_date(resultSet.getDate("registr_date"));
-                    user.setTaskId(resultSet.getInt("task_id"));
+                    user.setPassword(resultSet.getString("password"));
+                    user.setRole(resultSet.getString("role"));
+                    user.setStatus(resultSet.getString("status"));
                     return user;
                 }
             }
@@ -58,7 +60,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public List<User> getAllUser() {
+    public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
         try (Connection connection = dataSource.getConnection();
@@ -69,8 +71,9 @@ public class UserDAOImpl implements UserDAO {
                 user.setId(resultSet.getInt("id"));
                 user.setName(resultSet.getString("name"));
                 user.setEmail(resultSet.getString("email"));
-                user.setRegistr_date(resultSet.getDate("registr_date"));
-                user.setTaskId(resultSet.getInt("task_id"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(resultSet.getString("role"));
+                user.setStatus(resultSet.getString("status"));
                 users.add(user);
             }
         } catch (SQLException e) {
@@ -86,7 +89,6 @@ public class UserDAOImpl implements UserDAO {
              PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
             checkStatement.setString(1, user.getEmail());
             checkStatement.setInt(2, user.getId());
-
             try (ResultSet resultSet = checkStatement.executeQuery()) {
                 if (resultSet.next() && resultSet.getInt(1) > 0) {
                     throw new SQLException("Email '" + user.getEmail() + "' already exists.");
@@ -97,14 +99,15 @@ public class UserDAOImpl implements UserDAO {
             return;
         }
 
-        String sql = "UPDATE users SET name = ?, email = ?, registr_date = ?, task_id = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, status = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
-            statement.setDate(3, new java.sql.Date(user.getRegistr_date().getTime()));
-            statement.setInt(4, user.getTaskId());
-            statement.setInt(5, user.getId());
+            statement.setString(3, user.getPassword());
+            statement.setString(4, user.getRole());
+            statement.setString(5, user.getStatus());
+            statement.setInt(6, user.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -121,5 +124,27 @@ public class UserDAOImpl implements UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<User> getUsersByIds(List<Integer> ids) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE id IN (" + String.join(",", (CharSequence) ids) + ")";
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(resultSet.getString("role"));
+                user.setStatus(resultSet.getString("status"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 }
