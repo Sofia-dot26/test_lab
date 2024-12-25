@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="menu.jsp" %>
 <html>
 <head>
-    <title>Projects</title>
+    <title>Проекты</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,26 +35,26 @@
     </style>
 </head>
 <body>
-<h1>Projects</h1>
-<a href="${pageContext.request.contextPath}/projects/add">Add Project</a>
+<h1>Проекты</h1>
+<a href="${pageContext.request.contextPath}/projects/add">Добавить проект</a>
 
 <c:choose>
     <c:when test="${empty projects}">
-        <p>No projects available.</p>
+        <p>Нет доступных проектов.</p>
     </c:when>
     <c:otherwise>
         <table>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Responsible Person</th>
-                <th>Participants</th>
-                <th>Actions</th>
+                <th>Имя</th>
+                <th>Описание</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Приоритет</th>
+                <th>Статус</th>
+                <th>Ответственное лицо</th>
+                <th>Участники</th>
+                <th>Действия</th>
             </tr>
             <c:forEach var="project" items="${projects}">
                 <tr>
@@ -71,14 +72,13 @@
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach var="participantId" items="${project.participants}">
-                            <c:set var="participantName" value="${projectService.getUserName(participantId.id)}"/>
-                            ${participantName}<br>
+                        <c:forEach var="participant" items="${project.participants}">
+                            ${participant.name}<br>
                         </c:forEach>
                     </td>
                     <td>
-                        <a href="${pageContext.request.contextPath}/projects/edit/${project.id}">Edit</a> |
-                        <a href="${pageContext.request.contextPath}/projects/delete/${project.id}">Delete</a>
+                        <a href="${pageContext.request.contextPath}/projects/edit/${project.id}">Редактировать</a> |
+                        <a href="${pageContext.request.contextPath}/projects/delete/${project.id}">Удалить</a>
                     </td>
                 </tr>
             </c:forEach>
