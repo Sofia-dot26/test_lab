@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
     <title>Edit Task</title>
@@ -41,7 +42,7 @@
 </head>
 <body>
 <h1>Edit Task</h1>
-<form:form action="${pageContext.request.contextPath}/tasks/edit" method="post" modelAttribute="task">
+<form:form action="${pageContext.request.contextPath}/tasks/edit/${task.id}" method="post" modelAttribute="task">
     <label for="name">Task Name:</label>
     <form:input path="name" id="name" required="true"/>
 
@@ -63,20 +64,26 @@
 
     <label for="status">Status:</label>
     <form:select path="status" id="status" required="true">
-        <form:option value="In Queue">In Queue</form:option>
+        <form:option value="Planning">Planning</form:option>
         <form:option value="In Progress">In Progress</form:option>
         <form:option value="Completed">Completed</form:option>
     </form:select>
 
     <label for="project">Project:</label>
-    <form:select path="project.id" id="project" required="true">
-        <!-- Здесь должны быть опции для выбора проекта -->
-    </form:select>
+    <select name="projectId" id="project" required="true">
+        <c:forEach var="project" items="${projects}">
+            <option value="${project.id}" ${task.project.id == project.id ? 'selected' : ''}>${project.name}</option>
+        </c:forEach>
+    </select>
 
     <label for="assignees">Assignees:</label>
-    <form:select path="assignees" id="assignees" multiple="true" required="true">
-        <!-- Здесь должны быть опции для выбора исполнителей -->
-    </form:select>
+    <select name="assigneeIds" id="assignees" multiple required="true">
+        <c:forEach var="project" items="${projects}">
+            <c:forEach var="participant" items="${project.participants}">
+                <option value="${participant.id}" ${task.assignees.contains(participant) ? 'selected' : ''}>${participant.name}</option>
+            </c:forEach>
+        </c:forEach>
+    </select>
 
     <input type="submit" value="Save Changes">
 </form:form>

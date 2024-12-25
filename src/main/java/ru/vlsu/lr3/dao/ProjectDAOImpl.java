@@ -1,12 +1,12 @@
 package ru.vlsu.lr3.dao;
 
 import ru.vlsu.lr3.beans.Project;
+import ru.vlsu.lr3.beans.User;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
-import java.time.LocalDate;
 
 public class ProjectDAOImpl implements ProjectDAO {
 
@@ -17,7 +17,7 @@ public class ProjectDAOImpl implements ProjectDAO {
     }
 
     @Override
-    public void addProject(Project project) {
+    public void addProject(Project project, List<Integer> responsiblePersonIds, List<Integer> participantIds) {
         String sql = "INSERT INTO projects (name, description, start_date, end_date, priority, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -32,12 +32,14 @@ public class ProjectDAOImpl implements ProjectDAO {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     project.setId(generatedKeys.getInt(1));
-                    System.out.println("Inserted Project ID: " + project.getId());
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        addResponsiblePersons(project.getId(), responsiblePersonIds);
+        addParticipants(project.getId(), participantIds);
     }
 
     @Override
@@ -56,7 +58,8 @@ public class ProjectDAOImpl implements ProjectDAO {
                     project.setEndDate(String.valueOf(resultSet.getDate("end_date")));
                     project.setPriority(resultSet.getString("priority"));
                     project.setStatus(resultSet.getString("status"));
-                    // Добавьте логику для загрузки ответственных лиц и участников, если они хранятся в отдельных таблицах
+                    project.setResponsiblePersons(getResponsiblePersons(id));
+                    project.setParticipants(getParticipants(id));
                     return project;
                 }
             }
@@ -82,7 +85,8 @@ public class ProjectDAOImpl implements ProjectDAO {
                 project.setEndDate(String.valueOf(resultSet.getDate("end_date")));
                 project.setPriority(resultSet.getString("priority"));
                 project.setStatus(resultSet.getString("status"));
-                // Добавьте логику для загрузки ответственных лиц и участников, если они хранятся в отдельных таблицах
+                project.setResponsiblePersons(getResponsiblePersons(project.getId()));
+                project.setParticipants(getParticipants(project.getId()));
                 projects.add(project);
             }
         } catch (SQLException e) {
@@ -92,7 +96,7 @@ public class ProjectDAOImpl implements ProjectDAO {
     }
 
     @Override
-    public void updateProject(Project project) {
+    public void updateProject(Project project, List<Integer> responsiblePersonIds, List<Integer> participantIds) {
         String sql = "UPDATE projects SET name = ?, description = ?, start_date = ?, end_date = ?, priority = ?, status = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -107,6 +111,9 @@ public class ProjectDAOImpl implements ProjectDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        updateResponsiblePersons(project.getId(), responsiblePersonIds);
+        updateParticipants(project.getId(), participantIds);
     }
 
     @Override
@@ -116,6 +123,116 @@ public class ProjectDAOImpl implements ProjectDAO {
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<User> getParticipants(int projectId) {
+        List<User> participants = new ArrayList<>();
+        String sql = "SELECT u.* FROM project_participants pp JOIN users u ON pp.user_id = u.id WHERE pp.project_id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, projectId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    User user = new User();
+                    user.setId(resultSet.getInt("id"));
+                    user.setName(resultSet.getString("name"));
+                    user.setEmail(resultSet.getString("email"));
+                    user.setRole(resultSet.getString("role"));
+                    user.setStatus(resultSet.getString("status"));
+                    participants.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return participants;
+    }
+
+    private void addResponsiblePersons(int projectId, List<Integer> responsiblePersonIds) {
+        String sql = "INSERT INTO project_responsibles (project_id, user_id) VALUES (?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (Integer userId : responsiblePersonIds) {
+                statement.setInt(1, projectId);
+                statement.setInt(2, userId);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addParticipants(int projectId, List<Integer> participantIds) {
+        String sql = "INSERT INTO project_participants (project_id, user_id) VALUES (?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (Integer userId : participantIds) {
+                statement.setInt(1, projectId);
+                statement.setInt(2, userId);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<Integer> getResponsiblePersons(int projectId) {
+        List<Integer> responsiblePersonIds = new ArrayList<>();
+        String sql = "SELECT user_id FROM project_responsibles WHERE project_id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, projectId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    responsiblePersonIds.add(resultSet.getInt("user_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return responsiblePersonIds;
+    }
+
+    private void updateResponsiblePersons(int projectId, List<Integer> responsiblePersonIds) {
+        String deleteSql = "DELETE FROM project_responsibles WHERE project_id = ?";
+        String insertSql = "INSERT INTO project_responsibles (project_id, user_id) VALUES (?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement deleteStatement = connection.prepareStatement(deleteSql);
+             PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+            deleteStatement.setInt(1, projectId);
+            deleteStatement.executeUpdate();
+            for (Integer userId : responsiblePersonIds) {
+                insertStatement.setInt(1, projectId);
+                insertStatement.setInt(2, userId);
+                insertStatement.addBatch();
+            }
+            insertStatement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateParticipants(int projectId, List<Integer> participantIds) {
+        String deleteSql = "DELETE FROM project_participants WHERE project_id = ?";
+        String insertSql = "INSERT INTO project_participants (project_id, user_id) VALUES (?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement deleteStatement = connection.prepareStatement(deleteSql);
+             PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+            deleteStatement.setInt(1, projectId);
+            deleteStatement.executeUpdate();
+            for (Integer userId : participantIds) {
+                insertStatement.setInt(1, projectId);
+                insertStatement.setInt(2, userId);
+                insertStatement.addBatch();
+            }
+            insertStatement.executeBatch();
         } catch (SQLException e) {
             e.printStackTrace();
         }

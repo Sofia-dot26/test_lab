@@ -36,48 +36,21 @@ public class TaskController {
 
     @GetMapping("/add")
     public String addTaskForm(Model model) {
-        List<Project> projects = projectService.getAllProjects();
-        List<User> users = userService.getAllUsers();
         model.addAttribute("task", new Task());
+        List<Project> projects = projectService.getAllProjects();
         model.addAttribute("projects", projects);
-        model.addAttribute("users", users);
         return "taskForm";
     }
 
     @PostMapping("/add")
-    public String addTask(@DateTimeFormat(pattern = "yyyy-MM-dd") @ModelAttribute Task task, @RequestParam("projectId") int projectId, @RequestParam("assigneeIds") List<Integer> assigneeIds) {
-        Project project = new Project();
-        project.setId(projectId);
+    public String addTask(@DateTimeFormat(pattern = "yyyy-MM-dd") @ModelAttribute Task task,
+                          @RequestParam("projectId") int projectId,
+                          @RequestParam("assigneeIds") List<Integer> assigneeIds) {
+        Project project = projectService.getProject(projectId);
         task.setProject(project);
-
         List<User> assignees = userService.getUsersByIds(assigneeIds);
         task.setAssignees(assignees);
-
         taskService.addTask(task);
-        return "redirect:/tasks";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editTaskForm(@PathVariable int id, Model model) {
-        Task task = taskService.getTask(id);
-        List<Project> projects = projectService.getAllProjects();
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("task", task);
-        model.addAttribute("projects", projects);
-        model.addAttribute("users", users);
-        return "taskForm";
-    }
-
-    @PostMapping("/edit")
-    public String editTask(@DateTimeFormat(pattern = "yyyy-MM-dd") @ModelAttribute Task task, @RequestParam("projectId") int projectId, @RequestParam("assigneeIds") List<Integer> assigneeIds) {
-        Project project = new Project();
-        project.setId(projectId);
-        task.setProject(project);
-
-        List<User> assignees = userService.getUsersByIds(assigneeIds);
-        task.setAssignees(assignees);
-
-        taskService.updateTask(task);
         return "redirect:/tasks";
     }
 
@@ -87,10 +60,26 @@ public class TaskController {
         return "redirect:/tasks";
     }
 
-    @GetMapping("/project/{projectId}")
-    public String listTasksByProject(@PathVariable int projectId, Model model) {
-        List<Task> tasks = taskService.getTasksByProjectId(projectId);
-        model.addAttribute("tasks", tasks);
-        return "task";
+    @GetMapping("/edit/{id}")
+    public String editTaskForm(@PathVariable int id, Model model) {
+        Task task = taskService.getTask(id);
+        model.addAttribute("task", task);
+        List<Project> projects = projectService.getAllProjects();
+        model.addAttribute("projects", projects);
+        return "editTask";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String editTask(@DateTimeFormat(pattern = "yyyy-MM-dd") @ModelAttribute Task task,
+                           @PathVariable int id,
+                           @RequestParam("projectId") int projectId,
+                           @RequestParam("assigneeIds") List<Integer> assigneeIds) {
+        Project project = projectService.getProject(projectId);
+        task.setProject(project);
+        List<User> assignees = userService.getUsersByIds(assigneeIds);
+        task.setAssignees(assignees);
+        task.setId(id);
+        taskService.updateTask(task);
+        return "redirect:/tasks";
     }
 }

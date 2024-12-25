@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
     <title>Edit Project</title>
@@ -67,6 +68,20 @@
         <form:option value="In Progress">In Progress</form:option>
         <form:option value="Completed">Completed</form:option>
     </form:select>
+
+    <label for="responsiblePerson">Responsible Person:</label>
+    <select name="responsiblePerson" id="responsiblePerson" required="true">
+        <c:forEach var="user" items="${users}">
+            <option value="${user.id}" ${project.responsiblePersons.contains(user.id) ? 'selected' : ''}>${user.name}</option>
+        </c:forEach>
+    </select>
+
+    <label for="participants">Participants:</label>
+    <select name="participants" id="participants" multiple required="true">
+        <c:forEach var="user" items="${users}">
+            <option value="${user.id}" ${project.participants.contains(user) ? 'selected' : ''}>${user.name}</option>
+        </c:forEach>
+    </select>
 
     <input type="submit" value="Save Changes">
 </form:form>

@@ -9,8 +9,8 @@ public interface UserDAO {
     void addUser(User user) throws SQLException;
     User getUser(int id);
     List<User> getAllUsers();
-    void updateUser(User user);
+    void updateUser(User user) throws SQLException;
     void deleteUser(int id);
-
-    List<User> getUsersByIds(List<Integer> assigneeIds);
+    List<User> getUsersByIds(List<Integer> ids);
+    String getUserName(int userId);
 }

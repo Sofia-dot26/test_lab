@@ -8,11 +8,12 @@ public class Project {
     private String description;
     private String startDate;
     private String endDate;
-    private List<String> responsiblePersons; // Ответственные лица (менеджеры проекта)
-    private List<String> participants; // Участники проекта
     private String priority;
     private String status;
+    private List<Integer> responsiblePersons; // Ответственные лица (менеджеры проекта)
+    private List<User> participants; // Участники проекта
 
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -53,22 +54,6 @@ public class Project {
         this.endDate = endDate;
     }
 
-    public List<String> getResponsiblePersons() {
-        return responsiblePersons;
-    }
-
-    public void setResponsiblePersons(List<String> responsiblePersons) {
-        this.responsiblePersons = responsiblePersons;
-    }
-
-    public List<String> getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(List<String> participants) {
-        this.participants = participants;
-    }
-
     public String getPriority() {
         return priority;
     }
@@ -83,5 +68,21 @@ public class Project {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<Integer> getResponsiblePersons() {
+        return responsiblePersons;
+    }
+
+    public void setResponsiblePersons(List<Integer> responsiblePersons) {
+        this.responsiblePersons = responsiblePersons;
+    }
+
+    public List<User> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<User> participants) {
+        this.participants = participants;
     }
 }

@@ -1,10 +1,12 @@
 package ru.vlsu.lr3.service;
 
-import java.util.List;
 import ru.vlsu.lr3.beans.Task;
 import ru.vlsu.lr3.dao.TaskDAO;
 
+import java.util.List;
+
 public class TaskService {
+
     private final TaskDAO taskDAO;
 
     public TaskService(TaskDAO taskDAO) {
@@ -23,12 +25,12 @@ public class TaskService {
         return taskDAO.getAllTasks();
     }
 
-    public void updateTask(Task task) {
-        taskDAO.updateTask(task);
-    }
-
     public void deleteTask(int id) {
         taskDAO.deleteTask(id);
+    }
+
+    public void updateTask(Task task) {
+        taskDAO.updateTask(task);
     }
 
     public List<Task> getTasksByProjectId(int projectId) {

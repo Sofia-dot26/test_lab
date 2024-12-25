@@ -51,6 +51,8 @@
                 <th>End Date</th>
                 <th>Priority</th>
                 <th>Status</th>
+                <th>Responsible Person</th>
+                <th>Participants</th>
                 <th>Actions</th>
             </tr>
             <c:forEach var="project" items="${projects}">
@@ -62,6 +64,18 @@
                     <td>${project.endDate}</td>
                     <td>${project.priority}</td>
                     <td>${project.status}</td>
+                    <td>
+                        <c:forEach var="responsiblePersonId" items="${project.responsiblePersons}">
+                            <c:set var="responsiblePersonName" value="${projectService.getUserName(responsiblePersonId)}"/>
+                            ${responsiblePersonName}<br>
+                        </c:forEach>
+                    </td>
+                    <td>
+                        <c:forEach var="participantId" items="${project.participants}">
+                            <c:set var="participantName" value="${projectService.getUserName(participantId.id)}"/>
+                            ${participantName}<br>
+                        </c:forEach>
+                    </td>
                     <td>
                         <a href="${pageContext.request.contextPath}/projects/edit/${project.id}">Edit</a> |
                         <a href="${pageContext.request.contextPath}/projects/delete/${project.id}">Delete</a>

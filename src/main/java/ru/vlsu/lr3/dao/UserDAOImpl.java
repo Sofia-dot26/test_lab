@@ -71,7 +71,6 @@ public class UserDAOImpl implements UserDAO {
                 user.setId(resultSet.getInt("id"));
                 user.setName(resultSet.getString("name"));
                 user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
                 user.setRole(resultSet.getString("role"));
                 user.setStatus(resultSet.getString("status"));
                 users.add(user);
@@ -83,7 +82,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(User user) throws SQLException {
         String checkSql = "SELECT COUNT(*) FROM users WHERE email = ? AND id != ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
@@ -94,9 +93,6 @@ public class UserDAOImpl implements UserDAO {
                     throw new SQLException("Email '" + user.getEmail() + "' already exists.");
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
         }
 
         String sql = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, status = ? WHERE id = ?";
@@ -109,8 +105,6 @@ public class UserDAOImpl implements UserDAO {
             statement.setString(5, user.getStatus());
             statement.setInt(6, user.getId());
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -126,9 +120,13 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    @Override
     public List<User> getUsersByIds(List<Integer> ids) {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE id IN (" + String.join(",", (CharSequence) ids) + ")";
+        if (ids == null || ids.isEmpty()) {
+            return users;
+        }
+        String sql = "SELECT * FROM users WHERE id IN (" + String.join(",", ids.stream().map(Object::toString).toArray(String[]::new)) + ")";
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
@@ -146,5 +144,22 @@ public class UserDAOImpl implements UserDAO {
             e.printStackTrace();
         }
         return users;
+    }
+
+    @Override
+    public String getUserName(int userId) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -200,7 +200,6 @@ public class TaskDAOImpl implements TaskDAO {
                     user.setId(resultSet.getInt("id"));
                     user.setName(resultSet.getString("name"));
                     user.setEmail(resultSet.getString("email"));
-                    user.setPassword(resultSet.getString("password"));
                     user.setRole(resultSet.getString("role"));
                     user.setStatus(resultSet.getString("status"));
                     assignees.add(user);
