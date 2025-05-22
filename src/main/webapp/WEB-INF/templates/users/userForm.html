@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить пользователя</title>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fc;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #4e73df;
+            margin-bottom: 5px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+        }
+
+        h1 i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #5a5c69;
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #d1d3e2;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 12px 40px;
+            border: 1px solid #d1d3e2;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus,
+        .select-field:focus {
+            border-color: #4e73df;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b7b9cc;
+        }
+
+        .select-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b7b9cc;
+            pointer-events: none;
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #3d5ec8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(78, 115, 223, 0.2);
+        }
+
+        .btn-submit i {
+            margin-right: 8px;
+        }
+
+        .error {
+            color: #e74a3b;
+            font-size: 13px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .error i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #6e707e;
+            margin-top: 20px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #4e73df;
+        }
+
+        .back-link i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="menu :: menu"></div>
+
+<div class="container">
+    <div class="form-card">
+        <h1><i class="fas fa-user-plus"></i> Добавить пользователя</h1>
+
+        <form th:action="@{/users/add}" method="post" th:object="${user}">
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <div class="input-container">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="username" th:field="*{username}" required
+                           class="input-field" placeholder="Введите имя пользователя"/>
+                </div>
+                <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error">
+                    <i class="fas fa-exclamation-circle"></i><span th:text="${#fields.errors('username')}"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-container">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" th:field="*{email}" required
+                           class="input-field" placeholder="Введите email"/>
+                </div>
+                <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error">
+                    <i class="fas fa-exclamation-circle"></i><span th:text="${#fields.errors('email')}"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <div class="input-container">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" th:field="*{password}" required
+                           class="input-field" placeholder="Введите пароль"/>
+                </div>
+                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error">
+                    <i class="fas fa-exclamation-circle"></i><span th:text="${#fields.errors('password')}"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="roleId">Роль</label>
+                <div class="input-container">
+                    <i class="fas fa-user-tag select-icon"></i>
+                    <select id="roleId" th:field="*{roleId}" required class="select-field">
+                        <option value="" disabled selected>Выберите роль</option>
+                        <option value="1">Администратор</option>
+                        <option value="2">Менеджер</option>
+                        <option value="3">Пользователь</option>
+                    </select>
+                </div>
+                <div th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}" class="error">
+                    <i class="fas fa-exclamation-circle"></i><span th:text="${#fields.errors('roleId')}"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> Сохранить
+            </button>
+        </form>
+
+        <a th:href="@{/users}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Назад к списку пользователей
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

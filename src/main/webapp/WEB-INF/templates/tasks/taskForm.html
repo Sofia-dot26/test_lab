@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Task</title>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="date"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="menu :: menu"></div>
+
+<h1>Add Task <span th:text="${project.name} "></span></h1>
+<form th:action="@{/tasks/add}" method="post">
+    <label for="name">Task Name:</label>
+    <input type="text" id="name" name="name"  required="true"/>
+
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description"  required="true"/>
+
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" name="startDate"  required="true"/>
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" name="endDate"  required="true"/>
+
+    <label for="priority">Priority:</label>
+    <select id="priority" name="priority" required="true">
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+    </select>
+
+    <label for="status">Status:</label>
+    <select id="status" name="status"  required="true">
+        <option value="Planning">Planning</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+    </select>
+
+    <label for="projectId">Project:</label>
+    <input type="text" id="projectId" name="projectId" th:value="${project.id}" required="true"/>
+
+<!--    <select id="project" name="projectId" required="true">
+        <option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name}"></option>
+    </select>-->
+
+    <label for="assigneeId">Assignees:</label>
+    <select id="assigneeId"  name="assigneeId" required="true">
+        <option th:each="participant : ${project.getParticipants()}" th:value="${participant.id}" th:text="${participant.username}"></option>
+    </select>
+
+    <input type="submit" value="Add Task">
+</form>
+</body>
+</html>

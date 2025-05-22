@@ -2,54 +2,135 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/mvc
            http://www.springframework.org/schema/mvc/spring-mvc.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context.xsd">
+           http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/data/jpa
+           http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
     <context:component-scan base-package="ru.vlsu.lr3.controller"/>
+    <context:component-scan base-package="ru.vlsu.lr3.config.JpaConfig" />
+    <context:component-scan base-package="ru.vlsu.lr3" />
 
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
-        <property name="suffix" value=".jsp"/>
+    <!-- Включение поддержки аннотаций для Spring MVC -->
+    <mvc:annotation-driven />
+
+    <bean class="org.springframework.data.web.config.SpringDataWebConfiguration"/>
+
+    <!-- JPA -->
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="ru.vlsu.lr3.model" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+
+            </props>
+        </property>
+
+
     </bean>
+
+    <bean id="templateResolver" class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5" />
+        <property name="characterEncoding" value="UTF-8" />
+        <property name="cacheable" value="false" />
+    </bean>
+
+
+    <!-- Добавление интеграции с Spring Security -->
+    <bean id="templateEngine" class="org.thymeleaf.spring5.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+        <property name="additionalDialects">
+            <set>
+                <bean class="org.thymeleaf.extras.java8time.dialect.Java8TimeDialect" />
+                <bean class="org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect" />
+
+            </set>
+        </property>
+    </bean>
+
+    <bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8"/>
+        <property name="order" value="1" />
+        <property name="viewNames" value="*" />
+    </bean>
+
+
     <!-- DataSource configuration -->
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
         <property name="driverClassName" value="org.postgresql.Driver" />
-        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/manage" />
+        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/test_db" />
         <property name="username" value="postgres" />
         <property name="password" value="12345678" />
         <property name="maximumPoolSize" value="10"/>
     </bean>
 
 
+
+    <!-- Repository beans -->
+
     <!-- DAO Bean -->
+<!--
     <bean id="projectDAO" class="ru.vlsu.lr3.dao.ProjectDAOImpl">
         <constructor-arg ref="dataSource"/>
     </bean>
     <bean id="taskDAO" class="ru.vlsu.lr3.dao.TaskDAOImpl">
         <constructor-arg ref="dataSource"/>
     </bean>
-    <bean id="userDAO" class="ru.vlsu.lr3.dao.UserDAOImpl">
-        <constructor-arg ref="dataSource"/>
-    </bean>
+-->
 
     <!-- Service Bean -->
-    <bean id="projectService" class="ru.vlsu.lr3.service.ProjectService">
+<!--    <bean id="projectService" class="ru.vlsu.lr3.service.ProjectService">
         <constructor-arg ref="projectDAO"/>
     </bean>
     <bean id="taskService" class="ru.vlsu.lr3.service.TaskService">
         <constructor-arg ref="taskDAO"/>
-    </bean>
+    </bean>-->
     <bean id="userService" class="ru.vlsu.lr3.service.UserService">
-        <constructor-arg ref="userDAO"/>
+        <constructor-arg ref="userRepository"/>
     </bean>
-    <!-- Включение поддержки аннотаций для Spring MVC -->
-    <mvc:annotation-driven />
+    <bean id="roleService" class="ru.vlsu.lr3.service.RoleService">
+        <constructor-arg ref="roleRepository"/>
+    </bean>
+    <bean id="springSecurityConfig" class="ru.vlsu.lr3.config.SecurityConfig"/>
+<!--
+    &lt;!&ndash; Spring Security Configuration &ndash;&gt;
+
+
+    &lt;!&ndash; UserDetailsService Bean &ndash;&gt;
+    <bean id="userDetailsService" class="ru.vlsu.lr3.service.CustomUserDetailsService"/>
+
+    &lt;!&ndash; PasswordEncoder Bean &ndash;&gt;
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+-->
+
+
 
     <!-- Настройка валидатора -->
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+    <jpa:repositories base-package="ru.vlsu.lr3.repository"/>
+
 
 </beans>

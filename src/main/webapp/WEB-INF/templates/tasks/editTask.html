@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Редактирование задачи</title>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="menu :: menu"></div>
+
+<div class="container">
+    <div class="form-container">
+        <h1 class="mb-4">Редактирование задачи</h1>
+        <form th:action="@{/tasks/edit/{id}(id=${task.id})}" method="post" th:object="${task}">
+            <!-- CSRF токен (раскомментируйте, если используете CSRF защиту) -->
+            <!-- <input type="hidden" name="_csrf" th:value="${_csrf.token}"/> -->
+
+            <div class="form-group">
+                <label for="name">Название:</label>
+                <input type="text" id="name" th:field="*{name}" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <textarea id="description" th:field="*{description}" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="startDate">Дата начала:</label>
+                        <input type="date" id="startDate"
+                               th:field="*{startDate}"
+                               th:value="${#dates.format(task.startDate, 'yyyy-MM-dd')}"
+                               class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="endDate">Дата окончания:</label>
+                        <input type="date" id="endDate"
+                               th:field="*{endDate}"
+                               th:value="${#dates.format(task.endDate, 'yyyy-MM-dd')}"
+                               class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="priority">Приоритет:</label>
+                        <select id="priority" th:field="*{priority}" class="form-select" required>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="status">Статус:</label>
+                        <select id="status" th:field="*{status}" class="form-select" required>
+                            <option value="Planning">Planning</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="project">Проект:</label>
+                <select id="project" name="projectId" class="form-select" required>
+                    <option th:each="project : ${projects}"
+                            th:value="${project.id}"
+                            th:selected="${task.project.id == project.id}"
+                            th:text="${project.name}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="assignee">Исполнитель:</label>
+                <select id="assignee" name="assigneeId" class="form-select">
+                    <option value="">Not assigned</option>
+                    <option th:each="user : ${users}"
+                            th:value="${user.id}"
+                            th:selected="${task.assignee != null and task.assignee.id == user.id}"
+                            th:text="${user.username}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <a th:href="@{/tasks}" class="btn btn-secondary ms-2">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#assignee, #participants').select2({
+            placeholder: "Select users",
+            allowClear: true
+        });
+
+        // Инициализация Select2 для проекта, если нужно
+        $('#project').select2();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-header-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .profile-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .profile-action-btn i {
+            margin-right: 8px;
+            font-size: 13px;
+        }
+
+        .btn-edit-profile {
+            background-color: #4e73df;
+            color: white;
+            border: 1px solid #4e73df;
+        }
+
+        .btn-edit-profile:hover {
+            background-color: #3d5ec8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(78, 115, 223, 0.2);
+        }
+
+        .btn-change-password {
+            background-color: #f6c23e;
+            color: #2c3e50;
+            border: 1px solid #f6c23e;
+        }
+
+        .btn-change-password:hover {
+            background-color: #e4b135;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(246, 194, 62, 0.2);
+        }
+
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .toggle-notifications {
+            font-size: 0.9em;
+            cursor: pointer;
+            color: #6c757d;
+            text-decoration: none;
+        }
+
+        .toggle-notifications:hover {
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="menu :: menu"></div>
+
+<div class="profile-container">
+
+    <!-- Основная информация профиля -->
+    <div class="profile-info">
+        <div class="profile-card">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle fa-5x"></i>
+            </div>
+            <div class="profile-details">
+                <h2 th:text="${user.username}"></h2>
+                <p><i class="fas fa-envelope"></i> <span th:text="${user.email}"></span></p>
+                <!-- Действия профиля -->
+                <div class="profile-header-actions">
+                    <a th:href="@{/profile/edit}" class="profile-action-btn btn-edit-profile">
+                        <i class="fas fa-edit"></i> Редактировать профиль
+                    </a>
+                    <a th:href="@{/profile/password}" class="profile-action-btn btn-change-password">
+                        <i class="fas fa-key"></i> Изменить пароль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика пользователя -->
+    <div class="profile-stats">
+        <div class="stat-card">
+            <h3><i class="fas fa-project-diagram"></i>Project</h3>
+            <p th:text="${(user.getManagedProjects() != null ? user.getManagedProjects().size() : 0) +
+                         (user.getParticipatingProjects() != null ? user.getParticipatingProjects().size() : 0)}">0</p>
+            <small>
+                <span th:text="${user.getManagedProjects() != null ? user.getManagedProjects().size() : 0}">0</span> управляемых,
+                <span th:text="${user.getParticipatingProjects() != null ? user.getParticipatingProjects().size() : 0}">0</span> в участии
+            </small>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-tasks"></i> Задачи</h3>
+            <p th:text="${user.assignedTasks != null ? #lists.size(user.assignedTasks) : 0}">0</p>
+            <small>Назначено вам</small>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div th:if="${not #lists.isEmpty(notifications)}" class="notifications-section">
+        <div class="notifications-header">
+            <h3><i class="fas fa-bell"></i> Уведомления</h3>
+            <a href="#" class="toggle-notifications" onclick="toggleNotifications(event)">
+                <i class="fas fa-chevron-down"></i> Показать все
+            </a>
+        </div>
+
+        <div class="notification-list">
+            <!-- Первые 3 уведомления (всегда видимые) -->
+            <div th:each="notification, iter : ${notifications}"
+                 th:if="${iter.index < 3}"
+                 th:class="${'notification ' +
+                            (notification.type.name() == 'PROJECT_ASSIGNMENT' ? 'alert-info' :
+                             notification.type.name() == 'TASK_ASSIGNMENT' ? 'alert-warning' : 'alert-light')}">
+                <i th:class="${notification.type.name() == 'PROJECT_ASSIGNMENT' ? 'fas fa-project-diagram' :
+                              notification.type.name() == 'TASK_ASSIGNMENT' ? 'fas fa-tasks' : 'fas fa-info-circle'}"></i>
+                <span th:text="${notification.message}"></span>
+                <small class="text-muted"
+                       th:text="${notification.createdAt != null} ? ${#dates.format(notification.createdAt, 'dd.MM.yyyy HH:mm')} : 'No date'"></small>
+            </div>
+
+            <!-- Остальные уведомления (скрытые по умолчанию, за последние 5 дней) -->
+            <div class="additional-notifications" style="display: none;">
+                <div th:each="notification, iter : ${notifications}"
+                     th:if="${iter.index >= 3 and #dates.createNow().time - notification.createdAt.time le 432000000}"
+                     th:class="${'notification ' +
+                                (notification.type.name() == 'PROJECT_ASSIGNMENT' ? 'alert-info' :
+                                 notification.type.name() == 'TASK_ASSIGNMENT' ? 'alert-warning' : 'alert-light')}">
+                    <i th:class="${notification.type.name() == 'PROJECT_ASSIGNMENT' ? 'fas fa-project-diagram' :
+                                  notification.type.name() == 'TASK_ASSIGNMENT' ? 'fas fa-tasks' : 'fas fa-info-circle'}"></i>
+                    <span th:text="${notification.message}"></span>
+                    <small class="text-muted"
+                           th:text="${notification.createdAt != null} ? ${#dates.format(notification.createdAt, 'dd.MM.yyyy HH:mm')} : 'No date'"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleNotifications(event) {
+        event.preventDefault();
+
+        const additionalNotifications = document.querySelector('.additional-notifications');
+        const icon = event.currentTarget.querySelector('i');
+
+        if (additionalNotifications.style.display === 'none') {
+            additionalNotifications.style.display = 'block';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+            event.currentTarget.innerHTML = '<i class="fas fa-chevron-up"></i> Свернуть';
+        } else {
+            additionalNotifications.style.display = 'none';
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+            event.currentTarget.innerHTML = '<i class="fas fa-chevron-down"></i> Показать все';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+    <title>Авторизация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .login-container h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"],
+        .login-container input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        .login-container .link {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #007BFF;
+            text-decoration: none;
+            display: block;
+        }
+        .login-container .link:hover {
+            text-decoration: underline;
+        }
+        .login-container .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .login-container .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .login-container .checkbox-container input {
+            width: auto;
+            margin-right: 8px;
+        }
+        .error { color: red; }
+        .message { color: green; }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h1>Авторизация</h1>
+
+    <!-- Блок для вывода ошибок -->
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <!-- Блок для вывода сообщений (например, после выхода) -->
+    <div th:if="${message}" class="message" th:text="${message}"></div>
+
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" required/>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password" required/>
+        </div>
+        <div class="checkbox-container">
+            <input type="checkbox" name="remember-me" id="remember-me"/>
+            <label for="remember-me">Remember me</label>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+
+    <a th:href="@{/forgot-password}" class="link">Forgot password?</a>
+    <a th:href="@{/register}" class="link">Don't have an account? Register</a>
+</div>
+</body>
+</html>

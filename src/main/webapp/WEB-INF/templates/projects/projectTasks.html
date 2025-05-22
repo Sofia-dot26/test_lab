@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Tasks - <span th:text="${project.name}"></span></title>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fc;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #4e73df;
+            margin: 0;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .btn i {
+            margin-right: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3d5ec8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(78, 115, 223, 0.2);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #17a673;
+        }
+
+        .task-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #5a5c69;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+
+        .task-card {
+            border-left: 4px solid var(--primary-color);
+            border-radius: 6px;
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 0.875rem;
+            margin-bottom: 10px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-priority {
+            font-weight: 600;
+        }
+
+        .priority-high {
+            color: var(--danger-color);
+        }
+
+        .priority-medium {
+            color: var(--warning-color);
+        }
+
+        .priority-low {
+            color: var(--success-color);
+        }
+
+        .task-assignee {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-planning {
+            background-color: #e6e6e6;
+            color: #333;
+        }
+
+        .status-in-progress {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #dddfeb;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #5a5c69;
+        }
+
+        .action-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-link {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-link:hover {
+            color: #224abe;
+            text-decoration: none;
+        }
+
+        .action-link.delete {
+            color: var(--danger-color);
+        }
+
+        .action-link.delete:hover {
+            color: #be2617;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .task-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="menu :: menu"></div>
+
+<div class="container">
+    <div class="header">
+        <h1>
+            <i class="fas fa-project-diagram"></i>
+            Project: <span th:text="${project.name}"></span>
+        </h1>
+        <a th:href="@{/tasks/add?projectId={id}(id=${project.id})}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Task
+        </a>
+    </div>
+
+    <!-- Planning Tasks Section -->
+    <div class="task-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-clipboard-list"></i>
+                Need to do
+                <span class="badge bg-secondary" th:text="${todoTasks.size()}"></span>
+            </h2>
+        </div>
+
+        <div th:if="${todoTasks.isEmpty()}" class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No tasks in planning</h3>
+        </div>
+
+        <div th:each="task : ${todoTasks}" class="task-card">
+            <div class="task-title" th:text="${task.getName()}"></div>
+            <div class="task-description" th:text="${task.getDescription()} ?: 'No description'"></div>
+            <div class="task-meta">
+                <span class="task-priority"
+                      th:classappend="${task.getPriority() == 'High'} ? 'priority-high' :
+                                     (${task.getPriority() == 'Medium'} ? 'priority-medium' : 'priority-low')"
+                      th:text="${task.getPriority()}"></span>
+
+                <span class="task-assignee">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${task.getAssignee() != null ? task.getAssignee().getUsername() : 'Unassigned'}"></span>
+                </span>
+
+                <span class="task-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span th:text="${#dates.format(task.getEndDate(), 'dd.MM.yyyy')}"></span>
+                </span>
+
+                <span class="status-badge status-planning" th:text="${task.getStatus()}"></span>
+            </div>
+
+            <div class="action-links">
+                <!-- Кнопки изменения статуса (только для своих задач) -->
+                <div th:if="${task.getAssignee() != null and task.getAssignee().getUsername() == username}"
+                     class="status-actions">
+                    <form th:action="@{/task/{id}/start(id=${task.getId()})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                    </form>
+                </div>
+
+                <a th:href="@{/tasks/edit/{id}(id=${task.getId()})}" class="action-link">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a th:href="@{/tasks/delete/{id}(id=${task.getId()})}" class="action-link delete">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Tasks Section -->
+    <div class="task-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-tasks"></i>
+                In Progress
+                <span class="badge bg-primary" th:text="${inProgressTasks.size()}"></span>
+            </h2>
+        </div>
+
+        <div th:if="${inProgressTasks.isEmpty()}" class="empty-state">
+            <i class="fas fa-tasks"></i>
+            <h3>No tasks in progress</h3>
+        </div>
+
+        <div th:each="task : ${inProgressTasks}" class="task-card">
+            <div class="task-title" th:text="${task.getName()}"></div>
+            <div class="task-description" th:text="${task.getDescription()} ?: 'No description'"></div>
+            <div class="task-meta">
+                <span class="task-priority"
+                      th:classappend="${task.getPriority() == 'High'} ? 'priority-high' :
+                                     (${task.getPriority() == 'Medium'} ? 'priority-medium' : 'priority-low')"
+                      th:text="${task.getPriority()}"></span>
+
+                <span class="task-assignee">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${task.getAssignee() != null ? task.getAssignee().getUsername() : 'Unassigned'}"></span>
+                </span>
+
+                <span class="task-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span th:text="${#dates.format(task.getEndDate(), 'dd.MM.yyyy')}"></span>
+                </span>
+
+                <span class="status-badge status-in-progress" th:text="${task.getStatus()}"></span>
+            </div>
+
+            <div class="action-links">
+                <!-- Кнопки изменения статуса (только для своих задач) -->
+                <div th:if="${task.getAssignee() != null and task.getAssignee().getUsername() == username}"
+                     class="status-actions">
+                    <form th:action="@{/task/{id}/complete(id=${task.getId()})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </form>
+                </div>
+
+                <a th:href="@{/tasks/edit/{id}(id=${task.getId()})}" class="action-link">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a th:href="@{/tasks/delete/{id}(id=${task.getId()})}" class="action-link delete">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Tasks Section -->
+    <div class="task-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-check-circle"></i>
+                Completed
+                <span class="badge bg-success" th:text="${doneTasks.size()}"></span>
+            </h2>
+        </div>
+
+        <div th:if="${doneTasks.isEmpty()}" class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>No completed tasks</h3>
+        </div>
+
+        <div th:each="task : ${doneTasks}" class="task-card">
+            <div class="task-title" th:text="${task.getName()}"></div>
+            <div class="task-description" th:text="${task.getDescription()} ?: 'No description'"></div>
+            <div class="task-meta">
+                <span class="task-priority"
+                      th:classappend="${task.getPriority() == 'High'} ? 'priority-high' :
+                                     (${task.getPriority() == 'Medium'} ? 'priority-medium' : 'priority-low')"
+                      th:text="${task.getPriority()}"></span>
+
+                <span class="task-assignee">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${task.getAssignee() != null ? task.getAssignee().getUsername() : 'Unassigned'}"></span>
+                </span>
+
+                <span class="task-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span th:text="${#dates.format(task.getEndDate(), 'dd.MM.yyyy')}"></span>
+                </span>
+
+                <span class="status-badge status-completed" th:text="${task.getStatus()}"></span>
+            </div>
+
+            <div class="action-links">
+                <a th:href="@{/tasks/edit/{id}(id=${task.getId()})}" class="action-link">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a th:href="@{/tasks/delete/{id}(id=${task.getId()})}" class="action-link delete">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

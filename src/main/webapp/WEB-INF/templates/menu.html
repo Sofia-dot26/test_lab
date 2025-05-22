@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/resources/css/styles.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            background-color: #007BFF;
+            padding: 10px 0;
+        }
+        .menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .menu a:hover {
+            background-color: #0056b3;
+        }
+        .menu a.active {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="menu" th:fragment="menu">
+    <a th:href="@{/}" th:classappend="${#request.getRequestURI() == '/'} ? 'active' : ''">Главная</a>
+    <a th:href="@{/projects}" th:classappend="${#request.getRequestURI() == '/projects'} ? 'active' : ''">Проекты</a>
+    <a th:href="@{/tasks}" th:classappend="${#request.getRequestURI() == '/tasks'} ? 'active' : ''">Задачи</a>
+    <a th:href="@{/users}" th:classappend="${#request.getRequestURI() == '/users'} ? 'active' : ''">Пользователи</a>
+    <a th:href="@{/profile}">Profile</a>
+    <a th:href="@{/logout}" th:classappend="${#request.getRequestURI() == '/logout'} ? 'active' : ''">Выход</a>
+
+</div>
+</body>
+</html>
